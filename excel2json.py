@@ -35,13 +35,18 @@ df = pd.read_excel(excel_path, engine='openpyxl')
 excel_id = df['id'][0]
 excel_form = df['output'][0]
 
-# excel의 id로부터 파일명을 추출해서 json 파일 열기
+# excel의 id로부터 파일명을 추출
 json_file_path = '/Users/dataly/Desktop/ABU/' + excel_id.split('.')[0] + '.json'
+
+# json 파일 열기
 f = open(json_file_path)
 data = json.load(f)
 json_df = pd.json_normalize(data, record_path=['document'])
-print(json_df)
 
+print(json_df)
 # print(excel_form)
+
+# 불러온 json DataFrame에서 excel의 id에 해당하는 부분 추출
+
 
 # print(df)
