@@ -41,10 +41,13 @@ f = open(json_file_path)
 data = json.load(f)
 json_df = pd.json_normalize(data, record_path=['document'])
 
+data1 = Data()
+
 # print(json_df)
 # print(excel_form)
 
 # 불러온 json DataFrame에서 excel의 id에 해당하는 부분 추출
+
 
 
 # for file in txt_file:

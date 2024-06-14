@@ -21,9 +21,9 @@ class Data:
                  sentence: List[dict] = None, immoral_expression: List[dict] = None):
         self.id = id # json으로부터 불러옴
         self.metadata = metadata # json으로부터 불러옴
-        self.paragraph = paragraph
-        self.sentence = sentence
-        self.immoral_expression = immoral_expression
+        self.paragraph = paragraph # json으로부터 불러옴
+        self.sentence = sentence # excel로부터 불러옴
+        self.immoral_expression = immoral_expression # excel로부터 불러옴
 
 # data의 원소 (json으로부터 불러옴)
 class Paragraph:
