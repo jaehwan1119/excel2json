@@ -95,7 +95,6 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
     immoral_expression = ImmoralExpression()
     expression = Expression()
     explicitness = Explicitness()
-    explicitness_false = ExplicitnessFalse()
 
     # sentence를 저장할 결과 list
     i=0
@@ -127,12 +126,20 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
         # id 단위로 끊어서 temp_dict을 내보냄
         # (while문으로 excel 전체를 순회하다가 temp_dict에 저장된 아이디와 현재 순회중인 excel의 id가 다른 경우 데이터를 추가함)
         if i >= len(new_excel_dict['id']) or temp_dict['id'][0] != new_excel_dict['id'][i]:
+            asterisk_flag = False
             # 데이터를 json에 추가할 수 있도록 정제하고 class에 저장 후 temp_dict, temp_form 초기화
             k = 1
             length = len(temp_dict['output'])
             while k < length:
                 expression_id = find_pattern(temp_dict['output'][k], 0)[0]  # 선택문장 id
                 expression_form = replace_expression(find_pattern(temp_dict['output'][k], 1)[0])  # 선택문장 내용
+
+                # 선택문장이 없는 경우
+                if expression_id == '' and expression_form == '':
+                    no_exp_form = {key: value[0] for key, value in temp_dict.items()}
+                    no_expression_docu = pd.DataFrame([no_exp_form])
+                    write_excel(no_expression_docu, "no_expression", json_path)
+
                 k += 1
 
                 explicitness_list = [] # 생성된 explicitness class를 저장할 list
@@ -142,17 +149,17 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
                 k += 1
                 for explicitness_data in exp_form_list:
                     explicitness_form = explicitness_data  # explicitness form
-                    explicitness_type = 'True' if temp_dict['output'][k] == '명시' else 'False' # explicitness type
+                    explicitness_type = 'TRUE' if temp_dict['output'][k] == '명시' else 'FALSE' # explicitness type
                     explicitness_begin = expression_form.find(explicitness_form) # explicitness begin
                     explicitness_end = explicitness_begin + len(explicitness_form) # explicitness end
 
-                    if explicitness_type == True:
+                    # 명시성이 '명시'인 경우 <~:expression> 내용 삽입, '비명시'인 경우엔 선택문장 삽입
+                    if explicitness_type == 'TRUE':
                         explicitness.__init__(explicitness_type, explicitness_form, explicitness_begin, explicitness_end)  # explicitness class 생성
                         explicitness_list.append(explicitness.to_dict())
                     else:
-                        explicitness_false.__init__(explicitness_type, explicitness_begin, explicitness_end)
-                        explicitness_list.append(explicitness_false.to_dict())
-
+                        explicitness.__init__(explicitness_type, expression_form, explicitness_begin, len(expression_form))  # explicitness class 생성
+                        explicitness_list.append(explicitness.to_dict())
 
 
                 # expression 생성
@@ -161,10 +168,11 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
                 k += 1
                 expression_intensity = temp_dict['output'][k]  # 강도 (expression intensity)
 
-                if expression_intensity == "*":
+                # intensity가 *인 경우 따로 excel 파일 작성
+                if expression_intensity == "*" and asterisk_flag == False:
                     asterisk_docu = pd.DataFrame(temp_dict)
                     write_excel(asterisk_docu, "intensity_is_asterisk", json_path)
-
+                    asterisk_flag = True
                 k += 1
                 expression_domains = temp_dict['output'][k]  # 영역 (expression domain)
                 k += 1
