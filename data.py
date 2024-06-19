@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 
 # 임의의 데이터
-document_data = {
+temp_document_data = {
     'id' : "EXAU2302308290",
     'metadata' : {
         "title": "국립국어원 웹 말뭉치 추출 EXAU2302308290",
