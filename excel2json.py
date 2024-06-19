@@ -1,3 +1,4 @@
+import os
 import re
 import numpy as np
 import pandas as pd
@@ -45,6 +46,29 @@ def replace_expression(text: str) -> str:
 def find_keys(dictionary, value):
     return [key for key, val in dictionary.items() if val == value]
 
+# Excel파일 작성
+def write_excel(df: pd.DataFrame, filename: str, save_path: str) -> None:
+    # 파일명 끝에 확장자 없을 경우
+    if not filename.endswith('.xlsx'):
+        filename += '.xlsx'
+
+    # 저장 경로가 존재하지 않으면 생성
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    # 전체 파일 경로
+    file_path = os.path.join(save_path, filename)
+
+    # 파일이 이미 존재한다면 기존 파일에 이어서 저장
+    if os.path.exists(file_path):
+        existing_df = pd.read_excel(file_path)
+        combined_df = pd.concat([existing_df, df], ignore_index=True)
+        combined_df.to_excel(file_path, index=False, engine='openpyxl')
+    else:
+        # 파일이 존재하지 않으면 새 파일 생성
+        df.to_excel(file_path, index=False, engine='openpyxl')
+
+
 def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
     # excel파일의 DataFrame
     excel_df = pd.read_excel(excel_path, dtype=str)
@@ -71,6 +95,7 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
     immoral_expression = ImmoralExpression()
     expression = Expression()
     explicitness = Explicitness()
+    explicitness_false = ExplicitnessFalse()
 
     # sentence를 저장할 결과 list
     i=0
@@ -121,14 +146,25 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
                     explicitness_begin = expression_form.find(explicitness_form) # explicitness begin
                     explicitness_end = explicitness_begin + len(explicitness_form) # explicitness end
 
-                    explicitness.__init__(explicitness_type, explicitness_form, explicitness_begin, explicitness_end) # explicitness class 생성
-                    explicitness_list.append(explicitness.to_dict())
+                    if explicitness_type == True:
+                        explicitness.__init__(explicitness_type, explicitness_form, explicitness_begin, explicitness_end)  # explicitness class 생성
+                        explicitness_list.append(explicitness.to_dict())
+                    else:
+                        explicitness_false.__init__(explicitness_type, explicitness_begin, explicitness_end)
+                        explicitness_list.append(explicitness_false.to_dict())
+
+
 
                 # expression 생성
                 k += 1
                 expression_sentiment = temp_dict['output'][k]  # 긍/부정 (expression sentiment)
                 k += 1
                 expression_intensity = temp_dict['output'][k]  # 강도 (expression intensity)
+
+                if expression_intensity == "*":
+                    asterisk_docu = pd.DataFrame(temp_dict)
+                    write_excel(asterisk_docu, "intensity_is_asterisk", json_path)
+
                 k += 1
                 expression_domains = temp_dict['output'][k]  # 영역 (expression domain)
                 k += 1

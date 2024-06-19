@@ -1,5 +1,5 @@
 import time
-from excel2json import *
+from excel2json import excel2json
 
 start_time = time.time()
 

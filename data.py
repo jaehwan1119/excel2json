@@ -113,3 +113,19 @@ class Explicitness:
             "begin": self.begin,
             "end": self.end
         }
+
+class ExplicitnessFalse:
+    def __init__(self, type: str = None, begin: int = None, end: int = None):
+        self.type = type
+        self.begin = begin
+        self.end = end
+
+    def __str__(self):
+        return (f"Explicitness(type={self.type}, begin={self.begin}, end={self.end})")
+
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "begin": self.begin,
+            "end": self.end
+        }
