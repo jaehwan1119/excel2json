@@ -68,7 +68,6 @@ def write_excel(df: pd.DataFrame, filename: str, save_path: str) -> None:
         # 파일이 존재하지 않으면 새 파일 생성
         df.to_excel(file_path, index=False, engine='openpyxl')
 
-
 def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
     # excel파일의 DataFrame
     excel_df = pd.read_excel(excel_path, dtype=str)
@@ -169,10 +168,17 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
                 expression_intensity = temp_dict['output'][k]  # 강도 (expression intensity)
 
                 # intensity가 *인 경우 따로 excel 파일 작성
-                if expression_intensity == "*" and asterisk_flag == False:
-                    asterisk_docu = pd.DataFrame(temp_dict)
-                    write_excel(asterisk_docu, "intensity_is_asterisk", json_path)
-                    asterisk_flag = True
+                if expression_intensity == "*":
+                    if asterisk_flag == False:
+                        asterisk_docu = pd.DataFrame(temp_dict)
+                        write_excel(asterisk_docu, "intensity_is_asterisk", json_path)
+                        asterisk_flag = True
+                    expression_intensity = -1
+                else:
+                    if expression_intensity:
+                        expression_intensity = int(expression_intensity)
+                    else:
+                        expression_intensity = 0
                 k += 1
                 expression_domains = temp_dict['output'][k]  # 영역 (expression domain)
                 k += 1
@@ -185,7 +191,7 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
             json_id = temp_dict['id'][0]
             json_file_path = json_path + json_id.split('.')[0] + '.json'
 
-            # # excel의 id에 대한 json 파일 불러오기
+            # excel의 id에 대한 json 파일 불러오기
             f = open(json_file_path)
             data = json.load(f)
             search_result = find_object_by_id(data['document'], json_id)
