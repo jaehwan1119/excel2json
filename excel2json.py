@@ -47,7 +47,7 @@ def find_keys(dictionary, value):
     return [key for key, val in dictionary.items() if val == value]
 
 # Excel파일 작성
-def write_excel(df: pd.DataFrame, filename: str, save_path: str) -> None:
+def write_excel(df: pd.DataFrame, filename: str, save_path: str) -> dict:
     # 파일명 끝에 확장자 없을 경우
     if not filename.endswith('.xlsx'):
         filename += '.xlsx'
@@ -68,7 +68,7 @@ def write_excel(df: pd.DataFrame, filename: str, save_path: str) -> None:
         # 파일이 존재하지 않으면 새 파일 생성
         df.to_excel(file_path, index=False, engine='openpyxl')
 
-def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
+def excel2json(excel_path:str, json_path:str) -> None:
     # excel파일의 DataFrame
     excel_df = pd.read_excel(excel_path, dtype=str)
 
@@ -221,8 +221,7 @@ def excel2json(excel_path:str, json_path:str, save_path:str) -> None:
                 'diff_1': [],
                 'diff_2': []
             }
-    json_data = json.dumps(temp_document_data, indent=4, ensure_ascii=False)
-    # print(json_data)
 
-    with open(save_path, 'w', encoding='utf-8') as f:
-        f.write(json_data)
+    return temp_document_data
+
+
